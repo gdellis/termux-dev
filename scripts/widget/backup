@@ -7,20 +7,48 @@
 BACKUP_DIR="/sdcard/termux-backups"
 DATE=$(date +%Y%m%d_%H%M%S)
 
+# Default exclusions - add or remove items as needed
+# Can also use ~/.termux/backup-excludes file (one item per line)
+EXCLUDES="
+.cache
+node_modules
+.termux
+.local
+.git
+Downloads
+tmp
+.android
+.gradle
+.cargo
+go
+"
+
 # Create backup directory
 mkdir -p "$BACKUP_DIR"
 
-# Backup home directory (excluding large folders)
+# Build tar exclude arguments from default exclusions
+EXCLUDE_ARGS=""
+for item in $EXCLUDES; do
+    [ -n "$item" ] && EXCLUDE_ARGS="$EXCLUDE_ARGS --exclude='$item'"
+done
+
+# Add user exclusions from file if it exists
+if [ -f "$HOME/.termux/backup-excludes" ]; then
+    while IFS= read -r line; do
+        [ -n "$line" ] && EXCLUDE_ARGS="$EXCLUDE_ARGS --exclude='$line'"
+    done < "$HOME/.termux/backup-excludes"
+fi
+
+# Backup home directory
 echo "Creating backup..."
 
 # Get size estimate for progress bar
-SIZE=$(du -sb "$HOME" | cut -f1) 2>/dev/null || SIZE=100000000
+SIZE=$(du -sb "$HOME" 2>/dev/null | cut -f1) || SIZE=100000000
 
-tar -czf "$BACKUP_DIR/home_$DATE.tar.gz" \
-    --exclude='.cache' \
-    --exclude='node_modules' \
-    --exclude='.termux' \
-    -C "$HOME" . 2>/dev/null | pv -lep -s "$SIZE" >/dev/null
+# tar -> pv -> gzip for progress bar
+tar cf - -C "$HOME" . $EXCLUDE_ARGS 2>/dev/null \
+    | pv -lep -s "$SIZE" \
+    | gzip > "$BACKUP_DIR/home_$DATE.tar.gz"
 
 # Notify user
 if [ -f "$BACKUP_DIR/home_$DATE.tar.gz" ]; then
