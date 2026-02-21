@@ -1,0 +1,13 @@
+#!/data/data/com.termux/files/usr/bin/sh
+
+# Tasker Script: Hello World
+# File: ~/.termux/tasker/hello
+# Purpose: Basic Tasker test script
+
+echo "Hello from Tasker!"
+echo "Arguments: $@"
+
+# Echo back any arguments
+for arg in "$@"; do
+    echo "Arg: $arg"
+done

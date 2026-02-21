@@ -1,0 +1,10 @@
+#!/data/data/com.termux/files/usr/bin/sh
+
+# Widget Shortcut: Quick Update
+# File: ~/.shortcuts/quick-update
+# Purpose: Update packages with one tap
+
+echo "Updating packages..."
+apt update -y
+apt upgrade -y
+echo "Update complete!"

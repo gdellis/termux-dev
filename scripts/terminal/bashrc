@@ -1,0 +1,100 @@
+# Termux Terminal Enhancements
+# File: ~/.termux/bashrc additions
+# Add to ~/.bashrc or create ~/.bashrc if it doesn't exist
+
+# ========== ALIASES ==========
+
+# Package management
+alias update='apt update && apt upgrade -y'
+alias upd='update'
+alias install='apt install -y'
+alias remove='apt remove -y'
+alias autoremove='apt autoremove -y'
+alias search='apt search'
+alias show='apt show'
+
+# Navigation
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias home='cd ~'
+
+# List
+alias la='ls -la'
+alias ll='ls -lh'
+alias l='ls -1'
+
+# Safety
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Quick access
+alias termux-api='termux-open'  # Open URLs in Termux
+alias tfa='termux-fetch-password'  # Fetch API passwords
+
+# ========== FUNCTIONS ==========
+
+# Wake lock helper
+wakelock() {
+    termux-wake-lock
+    echo "Wake lock enabled"
+}
+
+wakeunlock() {
+    termux-wake-unlock
+    echo "Wake lock disabled"
+}
+
+# Quick backup
+backup() {
+    if [ -z "$1" ]; then
+        echo "Usage: backup <filename>"
+        return 1
+    fi
+    DATE=$(date +%Y%m%d)
+    cp -r "$1" "$1.backup_$DATE"
+    echo "Backed up $1 to $1.backup_$DATE"
+}
+
+# Quick serve current directory
+serve() {
+    port=${1:-8000}
+    python3 -m http.server "$port"
+}
+
+# Clipboard helpers
+copy() {
+    termux-clipboard-set "$1"
+    echo "Copied: $1"
+}
+
+paste() {
+    termux-clipboard-get
+}
+
+# Notification helper
+notify() {
+    title=${1:-"Termux"}
+    shift
+    text="$*"
+    termux-notification -t "$title" -c "$text"
+}
+
+# ========== ENVIRONMENT ==========
+
+# Set wake lock for long-running tasks
+export TERMUX_WAKE_LOCK=1
+
+# Enable color support
+export TERMUX_EXEC_IGNORE_DENYLIST=1
+
+# Useful PATH additions
+export PATH="$PREFIX/bin:$PATH"
+
+# ========== COMPLETION ==========
+
+# Enable bash completion for apt
+if [ -f "$PREFIX/share/bash-completion/completions/apt" ]; then
+    source "$PREFIX/share/bash-completion/completions/apt"
+fi

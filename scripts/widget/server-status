@@ -1,0 +1,22 @@
+#!/data/data/com.termux/files/usr/bin/sh
+
+# Widget Task: Server Status (Background)
+# File: ~/.shortcuts/tasks/server-status
+# Purpose: Show running services status in notification
+
+SERVICES="sshd:SSH dropbear:Dropbear nginx:WebServer postfix:Mail"
+
+echo "Checking services..."
+
+RESULT=""
+for service in $SERVICES; do
+    NAME="${service%%:*}"
+    LABEL="${service##*:}"
+    if pgrep -x "$NAME" >/dev/null 2>&1; then
+        RESULT="$RESULT$LABEL: Running\n"
+    else
+        RESULT="$RESULT$LABEL: Stopped\n"
+    fi
+done
+
+termux-notification -t "Server Status" -c "$(echo -e "$RESULT")"
