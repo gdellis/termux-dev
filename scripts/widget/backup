@@ -12,11 +12,15 @@ mkdir -p "$BACKUP_DIR"
 
 # Backup home directory (excluding large folders)
 echo "Creating backup..."
+
+# Get size estimate for progress bar
+SIZE=$(du -sb "$HOME" | cut -f1) 2>/dev/null || SIZE=100000000
+
 tar -czf "$BACKUP_DIR/home_$DATE.tar.gz" \
     --exclude='.cache' \
     --exclude='node_modules' \
     --exclude='.termux' \
-    -C "$HOME" . 2>/dev/null
+    -C "$HOME" . 2>/dev/null | pv -lep -s "$SIZE" >/dev/null
 
 # Notify user
 if [ -f "$BACKUP_DIR/home_$DATE.tar.gz" ]; then
